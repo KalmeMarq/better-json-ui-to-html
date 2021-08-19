@@ -1,0 +1,38 @@
+{
+  "namespace": "start_screen",
+
+  "button": {
+    "type": "button",
+    "css": {
+      "cursor": "pointer",
+      "background": "rgb(0, 0, 230)",
+      "border": "2px solid rgb(0, 0, 180)",
+      "border-radius": "4px",
+      "padding": "4px 1rem"
+    },
+    "controls": [
+      {
+        "label": {
+          "type": "label",
+          "color": "white",
+          "text": "My little button"
+        }
+      }
+    ]
+  },
+
+  "screen": {
+    "type": "screen",
+    "controls": [
+      {
+        "text": {
+          "type": "label",
+          "color": "white",
+          "text": "My new label (start)"
+        }
+      },
+      { "@button": {} },
+      { "@play_screen.start_list": {} }
+    ]
+  }
+}

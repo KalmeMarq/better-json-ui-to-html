@@ -1,0 +1,46 @@
+{
+  "controls": [
+    {
+      "type": "label",
+      "props": {
+        "css": {
+          "color": "yellow"
+        }
+      },
+      "controls": "Minecraft Bugrock Shit Edition"
+    },
+    {
+      "type": "panel",
+      "controls": [
+        {
+          "type": "label",
+          "props": {
+            "color": "red",
+            "shadow": true,
+            "shadow_config": {
+              "h": "1px",
+              "v": "1px"
+            }
+          },
+          "controls": "ui sucks"
+        },
+        {
+          "type": "label",
+          "props": {
+            "font_type": "Helvica",
+            "font_size": "20px",
+            "color": "blue"
+          },
+          "controls": "shader sucks"
+        },
+        {
+          "type": "label",
+          "props": {
+            "color": "green"
+          },
+          "controls": "gameplay sucks"
+        }
+      ]
+    }
+  ]
+}

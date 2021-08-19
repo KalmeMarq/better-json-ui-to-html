@@ -1,0 +1,103 @@
+{
+  "namespace": "start_screen_v2",
+
+  "button_label": {
+    "type": "label",
+    "props": {
+      "localize": false,
+      "color": "white"
+    }
+  },
+
+  "button": {
+    "type": "button",
+    "props": {
+      "css": {
+        "cursor": "pointer",
+        "background": "rgb(20, 20, 220)",
+        "border": "2px solid rgb(0, 0, 170)",
+        "border-radius": "4px",
+        "fontSize": "1rem",
+        "padding": "4px 1rem"
+      }
+    },
+    "controls": [
+      {
+        "@button_label": {
+          "controls": "menu.play"
+        }
+      }
+    ]
+  },
+
+  "bruh": {
+    "type": "label",
+    "props": {
+      "css": {
+        "color": "yellow",
+        "font-family": "sans-serif"
+      }
+    }
+  },
+
+  "super@bruh": {
+    "type": "label",
+    "controls": "Minecraft Bugrock Shit Edition"
+  },
+
+  "screen": {
+    "type": "screen",
+    "controls": [
+      { "title@play_screen_v2.start_title": {} },
+      { "title@play_screen_v2.goback_button": {} },
+      { "@button": {} },
+      {
+        "l0@super": {
+          "type": "label"
+        }
+      },
+      {
+        "p0": {
+          "type": "panel",
+          "controls": [
+            {
+              "l1": {
+                "type": "label",
+                "props": {
+                  "color": "red",
+                  "shadow": true,
+                  "shadow_config": {
+                    "h": "1px",
+                    "v": "1px"
+                  }
+                },
+                "controls": "ui sucks"
+              }
+            },
+            {
+              "l2": {
+                "type": "label",
+                "props": {
+                  "visible": false,
+                  "font_type": "Helvica",
+                  "font_size": "20px",
+                  "color": "blue"
+                },
+                "controls": "shader sucks"
+              }
+            },
+            {
+              "l3": {
+                "type": "label",
+                "props": {
+                  "color": "green"
+                },
+                "controls": "gameplay sucks"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

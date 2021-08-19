@@ -1,0 +1,54 @@
+{
+  "namespace": "play_screen",
+
+  "list_label": {
+    "type": "label",
+    "color": "red",
+    "font_size": "1.1rem"
+  },
+
+  "start_list": {
+    "type": "stack_panel",
+    "controls": [
+      {
+        "@play_screen.list_label": {
+          "text": "bugrock sucks"
+        }
+      },
+      {
+        "@play_screen.list_label": {
+          "text": "bugrock is trash"
+        }
+      },
+      {
+        "@play_screen.list_label": {
+          "text": "bugrock is shit"
+        }
+      },
+      {
+        "@play_screen.list_label": {
+          "text": "bugrock is buggy"
+        }
+      }
+    ]
+  },
+
+  "screen": {
+    "type": "screen",
+    "visible": true,
+    "localize": false,
+    "color": "white",
+    "css": {
+      "color": "yellow",
+      "font-family": "sans-serif"
+    },
+    "controls": [
+      {
+        "text": {
+          "type": "label",
+          "text": "My new label (play)"
+        }
+      }
+    ]
+  }
+}
