@@ -1,0 +1,26 @@
+{
+  "namespace": "play_screen_v2",
+
+  "start_title": {
+    "type": "label",
+    "controls": "Start Screen"
+  },
+
+  "title": {
+    "type": "label",
+    "controls": "Play Screen"
+  },
+
+  "goback_button": {
+    "type": "button",
+    "controls": "Go Back"
+  },
+
+  "screen": {
+    "type": "screen",
+    "controls": [
+      { "title@title": {} },
+      { "btn@goback_button": {} }
+    ]
+  }
+}
