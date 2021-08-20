@@ -3,6 +3,8 @@
 
   "button": {
     "type": "button",
+    "size": [700, 60],
+    "focus_enabled": true,
     "css": {
       "cursor": "pointer",
       "background": "rgb(0, 0, 230)",
@@ -10,20 +12,148 @@
       "border-radius": "4px",
       "padding": "4px 1rem"
     },
+    "button_mappings": [
+      {
+        "from_button_id": "button.menu_ok",
+        "to_button_id": "$pressed_button_name",
+        "mapping_type": "pressed"
+      }
+    ],
     "controls": [
       {
         "label": {
           "type": "label",
-          "color": "white",
-          "text": "My little button"
+          "color": "$btn_color",
+          "clip_children": true,
+          "font_size": "2rem",
+          "shadow": true,
+          "shadow_config": {
+            "h": "4px",
+            "v": "4px",
+            "color": "black"
+          },
+          "text": "$btn_text"
         }
       }
+    ]
+  },
+
+  "play_button@button": {
+    "$btn_text": "Play",
+    "$pressed_button_name": "button.test0"
+  },
+
+  "options_button@button": {
+    "$btn_text": "Options",
+    "$pressed_button_name": "button.test1"
+  },
+
+  "menu": {
+    "type": "stack_panel",
+    "offset": [0, 0],
+    "controls": [
+      { "a@play_button": {} },
+      { "a@options_button": {} }
+    ]
+  },
+
+  "my_grad": {
+    "type": "custom",
+    "renderer": "gradient_renderer",
+    "color1": "blue",
+    "color2": "yellow",
+    "layer": 200,
+    "anchor_from": "left_middle",
+    "anchor_to": "left_middle",
+    "advanced_config": {
+      "type": "linear",
+      "angle": "180deg",
+      "colors": [
+        {
+          "color": "rgba(0, 0, 255, 0.5)",
+          "stop": "0%"
+        },
+        {
+          "color": "yellow",
+          "stop": "50%"
+        },
+        {
+          "color": [0.9, 0.1, 0.1],
+          "stop": "100%"
+        }
+      ]
+    },
+    "size": [300, 300]
+  },
+
+  // New
+  "copyright": {
+    "type": "label",
+    "color": "$main_header_text_color",
+    "layer": 2,
+    "text": "menu.copyright",
+    "anchor_from": "top_left",
+    "anchor_to": "top_left"
+  },
+
+  "development_version": {
+    "type": "label",
+    "color": "$main_header_text_color",
+    "layer": 2,
+    "text": "#development_version",
+    "anchor_from": "center",
+    "anchor_to": "center"
+  },
+
+  "version": {
+    "type": "label",
+    "color": "$main_header_text_color",
+    "layer": 2,
+    "text": "#version",
+    "anchor_from": "top_right",
+    "anchor_to": "top_right"
+  },
+
+  "text_panel": {
+    "type": "panel",
+    "size": [ "100% - 2px", 20],
+    "offset": [ 0, -1],
+    "anchor_from": "bottom_middle",
+    "anchor_to": "bottom_middle",
+    "controls": [
+      {
+        "copyright@start_screen.copyright": {}
+      },
+      {
+        "development_version@start_screen.development_version": {
+        }
+      },
+      {
+        "version@start_screen.version": {}
+      }
+    ]
+  },
+
+  "main_buttons_stack_panel": {
+    "type": "stack_panel",
+    "size": [ "100%", "100%" ],
+    "$title_offset_padding": [ "100%", "10%" ],
+    "controls": [
+      { "@play_button": {}}
     ]
   },
 
   "screen": {
     "type": "screen",
     "controls": [
+      { "@start_screen_content": {} }
+    ]
+  },
+
+  "start_screen_content": {
+    "type": "panel",
+    "controls": [
+      { "@my_grad": { "offset": [0, 0] } },
       {
         "text": {
           "type": "label",
@@ -31,8 +161,20 @@
           "text": "My new label (start)"
         }
       },
-      { "@button": {} },
-      { "@play_screen.start_list": {} }
+      // { "@button": { "visible": "$show_is", "$bruh": "menu.play" } },
+      { "@play_screen.start_list": {} },
+      {
+        "m": {
+          "type": "image",
+          "texture": "textures/ui/cartography_table_empty.png",
+          "color": "rgba(255, 0, 0, 0.5)"
+        }
+      },
+      { "@menu": { }},
+      // { "main_buttons_stack_panel@main_buttons_stack_panel": { }},
+      {
+        "text_panel@start_screen.text_panel": {}
+      }
     ]
   }
 }

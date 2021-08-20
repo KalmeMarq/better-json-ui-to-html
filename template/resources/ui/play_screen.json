@@ -9,6 +9,8 @@
 
   "start_list": {
     "type": "stack_panel",
+    "offset": [0, -300],
+    "orientation": "vertical",
     "controls": [
       {
         "@play_screen.list_label": {

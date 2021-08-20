@@ -1,148 +1,63 @@
-import { IDecomposedName, IElement, IElementV3, ILangJSON, IScreenJSON, IUIDefs, IUIScreens, IUsualObj, TUsualObj } from "./types"
+import { IColor, IDecomposedName, IElement, IElementProps, IElementProps4, IElementV3, IElementV4, ILangJSON, IScreenJSON, ISize, IUIDefs, IUIScreens, IUsualObj, TUsualObj } from "./types"
 import JSON5 from 'json5'
+import UIElement from "./v4/UIElement"
+import UILabel from "./v4/UILabel"
+import UIPanel from "./v4/UIPanel"
+import UIStackPanel from "./v4/UIStackPanel"
+import UIButton from "./v4/UIButton"
+import UIImage from "./v4/UIImage"
+import UICustomGradient from "./v4/UICustomGradient"
 
- /** @deprecated */
- function renderElement(parent: HTMLElement, { type, props, controls }: IElement) {
-  let element = document.createElement(convertType(type))
-
-  if(typeof controls === 'string') {
-    element.appendChild(document.createTextNode(controls))
-  } else if(Array.isArray(controls)) {
-    controls.forEach(child => {
-      renderElement(element, child)
-    })
+let rootDiv = document.getElementById('root') as HTMLDivElement
+  
+  if(!rootDiv) {
+    rootDiv = document.createElement('div') as HTMLDivElement
+    rootDiv.id = 'root'
+    document.prepend(rootDiv)
   }
 
-  if(props) {
-    if(props.css) {
-      Object.entries(props.css).forEach((cssprop) => {
-        element.style[cssprop[0] as any] = cssprop[1]
+export class Languages {
+  public static lang = 'en_US' 
+  private static langNames: Map<string, string> = new Map()
+  private static langs: Map<string, ILangJSON> = new Map()
+
+  public static async reload() {
+    const data = await fetchJSON('resources/texts/languages.json')
+    const dataNames: [string, string][] = await fetchJSON('resources/texts/language_names.json')
+  
+    dataNames.forEach(nm => {
+      this.langNames.set(nm[0], nm[1])
+    })
+
+    for(let i = 0; i < data.length; i++) {
+      await new Promise<void>(async(resolve, reject) => {
+        const langFile = await (await fetch('resources/texts/' + data[i] +'.lang')).text()
+        this.langs.set(data[i], convertLangFile(langFile))
+        resolve()
       })
     }
-    if(props.font_type) {
-      element.style.fontFamily = props.font_type
-    }
-    if(props.visible !== undefined) {
-      if(!props.visible) {
-        element.style.display = 'none'
-      }
-    }
-    if(props.ignored !== undefined) {
-      if(props.ignored) {
-        element.style.display = 'none'
-      }
-    }
-    if(props.font_size) {
-      element.style.fontSize = props.font_size
-    }
-    if(props.color) {
-      element.style.color = props.color
-    }
-    if(props.shadow_config && props.shadow) {
-      element.style.textShadow = `
-        ${props.shadow_config.h ?? '1px'}
-        ${props.shadow_config.v ?? '1px'}
-        ${props.shadow_config.blur ?? '0px'}
-        ${props.shadow_config.color ?? 'black'}`
-    }
   }
 
-  parent.appendChild(element)
+  public static getLang(code: string) {
+    return this.langs.get(code) as ILangJSON
+  }
+
+  public static get(key: string) {
+    return (this.langs.get(this.lang) as ILangJSON)[key]
+  }
+
+  public static getList() {
+    return this.langNames
+  }
 }
 
-/** @deprecated */
-function getSuperV2(data: any, dpname: IDecomposedName) {
-  let l = Object.entries(data)
-  if(dpname.namespace) {
-    // l = Object.entries(uiFiles[dpname.namespace])
-  }
-
-  let b: any = l.find(n => {
-    let p = decomposeName(n[0])
-    return p.name === dpname.super
-  })
-  let s = decomposeName(b[0])
-
-  if(!b) return {}
-  let v = b[1]
-
-  if(s.super) {
-    v = { ...getSuperV2(data, s), ...v }
-  }
-  return v
-}
-
-/** @deprecated */
-function renderElementV2(data: any, parent: HTMLElement, { type, props, controls }: IElement) {
-  if(!type) throw new Error('Type expected!')
-  let element = document.createElement(convertType(type))
-
-  if(typeof controls === 'string') {
-    let b = controls
-   /*  if(langJSON[controls]) {
-      if(props && props.localize !== undefined) {
-        if(props.localize) {
-          b = langJSON[controls]
-        }
-      } else {
-        b = langJSON[controls]
-      }
-    } */
-    element.appendChild(document.createTextNode(b))
-  } else if(Array.isArray(controls)) {
-    controls.forEach(child => {
-      let dhm = decomposeName(Object.keys(child)[0])
-      let dhn = Object.values(child)[0]
-      if(dhm.super) {
-        dhn = { ...getSuperV2(data, dhm), ...dhn }
-      }
-      renderElementV2(data, element, dhn)
-    })
-  }
-
-  if(props) {
-    if(props.css) {
-      Object.entries(props.css).forEach((cssprop) => {
-        element.style[cssprop[0] as any] = cssprop[1]
-      })
-    }
-    if(props.font_type) {
-      element.style.fontFamily = props.font_type
-    }
-    if(props.visible !== undefined) {
-      if(!props.visible) {
-        element.style.display = 'none'
-      }
-    }
-    if(props.ignored !== undefined) {
-      if(props.ignored) {
-        element.style.display = 'none'
-      }
-    }
-    if(props.font_size) {
-      element.style.fontSize = props.font_size
-    }
-    if(props.color) {
-      element.style.color = props.color
-    }
-    if(props.shadow_config && props.shadow) {
-      element.style.textShadow = `
-        ${props.shadow_config.h ?? '1px'}
-        ${props.shadow_config.v ?? '1px'}
-        ${props.shadow_config.blur ?? '0px'}
-        ${props.shadow_config.color ?? 'black'}`
-    }
-  }
-
-  parent.appendChild(element)
-}
-
-function convertType(type: string): string {
+export function convertType(type: string): string {
   switch(type) {
     case 'image':
-      return 'img'
+      return 'div'
     case 'label':
       return 'p'
+    case 'button':
     case 'screen':
     case 'panel':
     case 'stack_panel':
@@ -153,11 +68,11 @@ function convertType(type: string): string {
   }
 }
 
-async function fetchJSON(url: string) {
+export async function fetchJSON(url: string) {
   return JSON5.parse(await (await fetch(url)).text())
 }
 
-function convertLangFile(langfile: string): ILangJSON {
+export function convertLangFile(langfile: string): ILangJSON {
   let obj: ILangJSON = {}
   let l0 = langfile.split('\r\n')
   for(let i = 0; i < l0.length; i++) {
@@ -170,7 +85,7 @@ function convertLangFile(langfile: string): ILangJSON {
   return obj
 }
 
-function decomposeName(name: string): IDecomposedName {
+export function decomposeName(name: string): IDecomposedName {
   let txt = name
   let i = txt.indexOf('@')
   let j = txt.indexOf('.', i)
@@ -198,7 +113,7 @@ function removeExtension(filename: string) {
   return filename.substring(0, filename.lastIndexOf('.'))
 }
 
-function getSuperV3(uis: IUIScreens, data: IScreenJSON, dpname: IDecomposedName) {
+export function getSuperV3(uis: IUIScreens, data: IScreenJSON, dpname: IDecomposedName) {
   let l = Object.entries(data)
   if(dpname.namespace) {
     l = Object.entries(uis[dpname.namespace])
@@ -219,20 +134,6 @@ function getSuperV3(uis: IUIScreens, data: IScreenJSON, dpname: IDecomposedName)
   return v
 }
 
-async function getLangs(langsfile: string[]) {
-  let obj: TUsualObj<ILangJSON> = {}
-
-  for(let i = 0; i < langsfile.length; i++) {
-    await new Promise<void>(async(resolve, reject) => {
-      const langFile = await (await fetch('resources/texts/' + langsfile[i] +'.lang')).text()
-      obj[langsfile[i]] = convertLangFile(langFile)
-      resolve()
-    })
-  }
-
-  return obj
-}
-
 async function getUIs(uidefsfile: IUIDefs) {
   let obj: IUIScreens = {}
   
@@ -247,11 +148,13 @@ async function getUIs(uidefsfile: IUIDefs) {
   return obj
 }
 
-function convertToElementV2(control: { [key: string]: any }) {
-  let obj: IElementV3 = {
+function convertToElementV4(control: { [key: string]: any }) {
+  let obj: IElementV4 = {
     type: '',
-    props: {},
-    controls: ''
+    props: {
+      offset: [0, 0]
+    },
+    controls: []
   }
 
   Object.entries(control).forEach(([prop, value]) => {
@@ -259,121 +162,88 @@ function convertToElementV2(control: { [key: string]: any }) {
     else if(prop === 'controls') obj.controls = value
     else {
       obj.props[prop] = value
+
+      if(typeof value === 'string') {
+        if(value.startsWith('$')) {
+          if(control[value]) {
+            obj.props[prop] = control[value]
+          }
+        }
+      }
     }
   })
 
   return obj
 }
 
-function localizeText(langs: TUsualObj<ILangJSON>, text: string, localize?: boolean) {
+export function localizeText(text: string, localize?: boolean) {
   let txt = text
-  if(langs['en_US'][text]) {
+  if(Languages.get(text)) {
     if(localize !== undefined) {
       if(localize) {
-        txt = langs['en_US'][text]
+        txt = Languages.get(text)
       }
     } else {
-      txt = langs['en_US'][text]
+      txt = Languages.get(text)
     }
   }
 
   return txt
 }
 
-function renderElementV3(uis: IUIScreens, data: IScreenJSON, langs: TUsualObj<ILangJSON>, parent: HTMLElement, control: { [key: string]: any }) {
-  const { type, props, controls } = convertToElementV2(control)
-
-  if(!type) throw new Error('Type expected!')
-  let element = document.createElement(convertType(type))
-
-  if(typeof controls === 'string') {
-    let text = controls
-    if(langs['en_US'][controls]) {
-      if(props && props.localize !== undefined) {
-        if(props.localize) {
-          text = langs['en_US'][controls]
-        }
-      } else {
-        text = langs['en_US'][controls]
-      }
-    }
-    element.appendChild(document.createTextNode(text))
-  } else if(Array.isArray(controls)) {
-    controls.forEach(child => {
-      let dhm = decomposeName(Object.keys(child)[0])
-      let dhn = Object.values(child)[0]
-      if(dhm.super) {
-        dhn = { ...getSuperV3(uis, data, dhm), ...dhn }
-      }
-      renderElementV3(uis, data, langs, element, dhn)
-    })
+function renderElementV4(uis: IUIScreens, data: IScreenJSON, parent: UIElement | null, parentEl: HTMLElement, element: IElementV4) {
+  let dt = {
+    type: element.type,
+    props: element.props,
+    controls: element.controls
   }
 
-  Object.entries(props).forEach(([prop, value]) => {
-    if(prop === 'css') {
-      Object.entries(value).forEach((cssprop: any) => {
-        element.style[cssprop[0] as any] = cssprop[1]
-      })
-    } else if(prop === 'font_type') {
-      element.style.fontFamily = value
-    } else if(prop === 'visible') {
-      if(!value) element.style.display = 'none'
-    } else if(prop === 'ignored') {
-      if(value) element.style.display = 'none'
-    } else if(prop === 'font_size') {
-      element.style.fontSize = value
-    } else if(prop === 'color') {
-      element.style.color = value
-    } else if(prop === 'shadow_config' && props.shadow) {
-      element.style.textShadow = `
-        ${value.h ?? '1px'}
-        ${value.v ?? '1px'}
-        ${value.blur ?? '0px'}
-        ${value.color ?? 'black'}`
-    } else if(prop === 'text') {
-      element.appendChild(document.createTextNode(localizeText(langs, value, props.localize)))
-    }
-  })
-
-  parent.appendChild(element)
-}
-
-;(async() => {
-  let rootDiv = document.getElementById('root') as HTMLDivElement
+  if(parent) parent.el = parentEl
   
-  if(!rootDiv) {
-    rootDiv = document.createElement('div') as HTMLDivElement
-    rootDiv.id = 'root'
-    document.prepend(rootDiv)
+  let q: UIElement | undefined
+  if(element.type === 'label') {
+    q = new UILabel(parent, parentEl, dt)
+  } else if(element.type === 'panel') {
+    q = new UIPanel(parent, parentEl, dt)
+  } else if(element.type === 'stack_panel') {
+    q = new UIStackPanel(parent, parentEl, dt)
+  } else if(element.type === 'button') {
+    q = new UIButton(parent, parentEl, dt)
+  } else if(element.type === 'image') {
+    q = new UIImage(parent, parentEl, dt)
+  } else if(element.type === 'custom') {
+    if(element.props.renderer === 'gradient_renderer') {
+      q = new UICustomGradient(parent, parentEl, dt)
+    }
+  } else {
+    q = new UIPanel(parent, parentEl, dt)
   }
 
-  const langsFile = await fetchJSON('resources/texts/languages.json')
-  const langs: TUsualObj<ILangJSON> = await getLangs(langsFile)
+  dt.controls.forEach(c => {
+    let ob = Object.entries(c)[0]
+    let dnm = decomposeName(Object.keys(c)[0])
+    let p = ob[1]
+    if(dnm.super) {
+      p = {...getSuperV3(uis, data, dnm), ...p}
+    }
+
+    let elP1 = convertToElementV4(p)
+    if(q) renderElementV4(uis, data, q, q.el, elP1)
+  })
+}
+export let globalVars: TUsualObj<string> = {}
+;(async() => {
+  await Languages.reload()
   
   const uiDefsFile = await fetchJSON('resources/ui/_ui_defs.json')
   const uis: IUIScreens = await getUIs(uiDefsFile)
 
-  renderElementV3(uis, uis['start_screen'], langs, rootDiv, uis['start_screen'].screen)
+  globalVars = await fetchJSON('resources/ui/_global_variables.json')
+
+  Object.entries(uis['start_screen']).forEach(c0 => {
+    if(c0[0] === 'screen') {
+      let elP = convertToElementV4((c0[1] as any))
+      renderElementV4(uis, uis['start_screen'], null, rootDiv, elP)
+    }
+  })
 })()
-
-  // const uiDefs: IUIDefs = JSON5.parse(await (await fetch('resources/_ui_defs.json')).text())
-  // for(let idx = 0; idx < uiDefs.ui_defs.length; idx++) {
-  //   await new Promise<void>(async(resolve, reject) => {
-  //     uiFiles[uiDefs.ui_defs[idx].replace('.json', '')] = JSON5.parse(await (await fetch('resources/' + uiDefs.ui_defs[idx])).text())
-  //     resolve()
-  //   })
-  // }
-
-  // const typesV2JSON = JSON5.parse(await (await fetch('resources/start_screen_v2.json')).text())
-
-  
-  // const langFile = await (await fetch('resources/texts/en_US.lang')).text()
-  // langJSON = convertLangFile(langFile)
-  // console.log(langJSON);
-
-  // renderElement(rootDiv, typesJSON)
-  // renderElementV2(typesV2JSON, rootDiv, typesV2JSON.screen)
-/* 
-  
-
-*/
